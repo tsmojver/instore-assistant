@@ -1,9 +1,23 @@
+using ia_backend;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// --- OpenAI Action configuration
+var openAiApiKey = builder.Configuration.GetSection("openAi").GetValue<string>("apiKey");
+if (openAiApiKey is null)
+{
+    throw new Exception("broken configuration, missing openAI API Key");
+}
+
+builder.Services.AddSingleton<OpenAIActions>(s => new OpenAIActions(openAiApiKey));
+// --- End of configuration
 
 var app = builder.Build();
 
@@ -16,29 +30,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+app.MapPost("/chat", async (
+    [FromBody] string inputText,
+    [FromServices] OpenAIActions actions) =>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
+        JObject response = await actions.Chat(inputText);
+
+        return response.ToString();
     })
-    .WithName("GetWeatherForecast")
+    .WithName("Chat")
     .WithOpenApi();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
