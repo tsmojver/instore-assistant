@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Chat } from "react-chat-module";
 import "react-chat-module/dist/index.css";
 import styles from './App.module.css';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 const AZURE_API_KEY = "3d6f86c1346c47d4880bb548c6b304ce";
 const AZURE_BACKEND_URL = "https://odlu-m23ljsw2-eastus2.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview"
@@ -12,6 +13,8 @@ const testComponent = () => {
 
 
 function App() {
+  const [isListening, setIsListening]  = useState(false);
+  const audioRef = useRef();
   // add initial set of example messages
   // const [messages, setMessages] = useState([
   //   {
@@ -34,36 +37,69 @@ function App() {
   // ]);
 
   // const [allSpokenWords] = '';
+  const handleHeyDom = () => {
+    setIsListening(true);
+    audioRef.current.play();
+  }
+  const handleWords = (words) => {
+    console.log('handleWords', words, isListening);
+    if (isListening) {
+      setPromptValue(words);
+      sendMessageToModel(words);
+      setIsListening(false);
+    }
+  }
+  const commands = [
+    {
+      command: 'Hey Dom',
+      callback: () => handleHeyDom()
+    },
+    {
+      command: '*',
+      callback: (words) => handleWords(words)
+    }
+  ]
+  const { listening, resetTranscript, transcript, browserSupportsSpeechRecognition } = useSpeechRecognition({ commands });
   const [promptValue, setPromptValue] = useState('')
+  const handleResult = (value) => {
+    setPromptValue(value);
+    sendMessageToModel();
+  }
+  // const {
+  //   isListening,
+  //   isStopped,
+  //   result,
+  //   start,
+  //   stop
+  // } = useWebSpeech(handleResult);
+  // useEffect(() => {
+  //   console.log('Recording')
+  //   const recognition = new webkitSpeechRecognition();
+  //   recognition.lang = "en-US";
+  //   recognition.interimResults = false;
+  //   recognition.maxAlternatives = 1;
+  //   recognition.continuous = true;
 
-  useEffect(() => {
-    console.log('Recording')
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    recognition.continuous = true;
+  //   console.log('starting recognition')
+  //   recognition.start();
+  //   recognition.onresult = (event) => {
+  //     console.log(event)
+  //     const speechResult = event.results[event.results.length - 1][0].transcript;
+  //     console.log('Result:', speechResult)
+  //     setPromptValue(speechResult)
+  //   }
+  //   recognition.onend = () => {
+  //     console.log('ended')
+  //   }
+  //   recognition.onerror = (event) => {
+  //     console.log('Error:', event.error)
+  //   }
 
-    console.log('starting recognition')
-    recognition.start();
-    recognition.onresult = (event) => {
-      console.log(event)
-      const speechResult = event.results[event.results.length - 1][0].transcript;
-      console.log('Result:', speechResult)
-      setPromptValue(speechResult)
-    }
-    recognition.onend = () => {
-      console.log('ended')
-    }
-    recognition.onerror = (event) => {
-      console.log('Error:', event.error)
-    }
-
-    return () => {
-      console.log('stopping recognition')
-      recognition.stop();
-    }
-  }, [])
+  //   return () => {
+  //     console.log('stopping recognition')
+  //     recognition.stop();
+  //   }
+  // }, [])
 
   // const onSend = async (message) => {
   //   // build new message received from chat component
@@ -104,8 +140,10 @@ function App() {
   //     ]);
   //   }, 2000);
   // };
-
-  const sendMessageToModel = async () => {
+  SpeechRecognition.startListening({
+    continuous: true
+  });
+  const sendMessageToModel = async (words) => {
     try {
       const response = await fetch(AZURE_BACKEND_URL, {
         method: 'POST',
@@ -119,7 +157,7 @@ function App() {
               role: 'system',
               content: [{
                 type: 'text',
-                text: promptValue
+                text: words
               }],
             }
           ]
@@ -134,7 +172,6 @@ function App() {
       console.error('Error:', error);
     }
   }
-
   // adding chat component in full screen container
   return (
     <div className={styles.App}>
@@ -144,9 +181,10 @@ function App() {
           factory: testComponent
         }
       }} /> */}
+      <audio ref={audioRef} controls={false} src="/dinner-bell.wav"></audio>
       <section className={styles.topNav}>In Store Assistant</section>
       <section className={styles.messagesContainer}>
-        Chat Messages
+        Chat Messages {Boolean(listening) && 'Listening' || 'Not Listening'} {Boolean(browserSupportsSpeechRecognition) ? 'Supports' : 'Doesn\'t Support' }
       </section>
       <section className={styles.inputRow}>
         <textarea className={styles.input} onInput={e => setPromptValue(e.currentTarget.value)} type="text" inputMode='text' value={promptValue} />
