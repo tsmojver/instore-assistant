@@ -12,26 +12,6 @@ var subscriptionKey = "bd12a82306f448b1bb537464ea58ca8c";
 var serviceRegion = "eastus";
 
 function App() {
-  // add initial set of example messages
-  // const [messages, setMessages] = useState([
-  //   {
-  //     createdAt: new Date(Date.now()),
-  //     messageId: "1",
-  //     senderId: "1",
-  //     profilePicture: "https://via.placeholder.com/150",
-  //     type: "text",
-  //     text: "Hello, how are you?",
-  //     name: "You"
-  //   },
-  //   {
-  //     createdAt: new Date(Date.now() + 2000),
-  //     messageId: "2",
-  //     senderId: "2",
-  //     profilePicture: "https://via.placeholder.com/150",
-  //     type: "text",
-  //     text: "Hungry, and you?"
-  //   },
-  // ]);
 
   const [messages, setMessages] = useState([]);
 
@@ -69,46 +49,6 @@ function App() {
       }
     );
   };
-
-  // const onSend = async (message) => {
-  //   // build new message received from chat component
-  //   const messageId = parseInt(messages[messages.length - 1].messageId) + 1;
-  //   const newMessage = {
-  //     messageId: `${messageId}`,
-  //     senderId: "1",
-  //     profilePicture: "https://via.placeholder.com/150",
-  //     type: message.type,
-  //     text: message.text,
-  //     createdAt: message.createdAt,
-  //     read: false
-  //   };
-
-  //   // store user message in messages state and add "server" message
-  //   // to simulate typing
-  //   setMessages([
-  //     ...(messages.filter((message) => message.type !== "typing")),
-  //     newMessage, {
-  //       messageId: `${messageId + 1}`,
-  //       senderId: "2",
-  //       profilePicture: "https://via.placeholder.com/150",
-  //       type: "typing",
-  //       createdAt: new Date(Date.now()),
-  //       read: false
-  //     }
-  //   ]);
-
-  //   setTimeout(() => {
-  //     // send generated answer after 2secs of "typing"
-  //     const answer = Object.assign({}, newMessage);
-  //     answer.senderId = "2";
-  //     answer.createdAt = new Date(Date.now());
-  //     answer.messageId = `${messageId + 1}`;
-  //     setMessages((messages) => [
-  //       ...(messages.filter((message) => message.type !== "typing")),
-  //       answer
-  //     ]);
-  //   }, 2000);
-  // };
 
   const sendMessageToModel = async () => {
     setMessages((messages) => [...messages, { text: promptValue }]);
