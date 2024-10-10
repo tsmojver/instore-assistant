@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Chat } from "react-chat-module";
 import "react-chat-module/dist/index.css";
 import styles from './App.module.css';
+import ChatMessage from './components/ChatMessage';
+import c from 'classnames';
 
 const AZURE_API_KEY = "3d6f86c1346c47d4880bb548c6b304ce";
 const AZURE_BACKEND_URL = "https://odlu-m23ljsw2-eastus2.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-15-preview"
@@ -32,6 +34,8 @@ function App() {
   //     text: "Hungry, and you?"
   //   },
   // ]);
+
+  const [messages, setMessages] = useState([]);
 
   // const [allSpokenWords] = '';
   const [promptValue, setPromptValue] = useState('')
@@ -106,6 +110,8 @@ function App() {
   // };
 
   const sendMessageToModel = async () => {
+    setMessages(messages => [...messages, { text: promptValue }])
+
     try {
       const response = await fetch(AZURE_BACKEND_URL, {
         method: 'POST',
@@ -128,6 +134,7 @@ function App() {
 
       console.log('Success:', response);
       const responseJSON = await response.json();
+      setMessages(messages => [...messages, { text: responseJSON?.choices[0]?.message?.content }])
       console.log(responseJSON?.choices[0]?.message?.content);
       setPromptValue('')
     } catch (error) {
@@ -145,8 +152,8 @@ function App() {
         }
       }} /> */}
       <section className={styles.topNav}>In Store Assistant</section>
-      <section className={styles.messagesContainer}>
-        Chat Messages
+      <section className={c(styles.messagesContainer, !messages.length && styles.noMessages)}>
+        {messages.length ? messages.map((message, index) => { return <ChatMessage key={index} isLeftAligned={index % 2 ? false : true}>{message.text}</ChatMessage> }) : <div>No messages</div>}
       </section>
       <section className={styles.inputRow}>
         <textarea className={styles.input} onInput={e => setPromptValue(e.currentTarget.value)} type="text" inputMode='text' value={promptValue} />

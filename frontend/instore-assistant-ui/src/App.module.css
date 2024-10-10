@@ -16,11 +16,18 @@
   background: var(--dominos-blue);
   color: white;
   font-weight: bold;
-  padding: 1rem 0.5rem;
+  padding: 1rem;
 }
 
 .messagesContainer {
   flex-grow: 1;
+}
+.messagesContainer.noMessages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--dominos-darker);
 }
 
 .inputRow {

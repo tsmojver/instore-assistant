@@ -1,0 +1,26 @@
+.chatBubbleContainer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.chatBubbleContainer.leftAligned {
+  justify-content: flex-start;
+}
+
+.chatBubbleContainer.leftAligned .chatBubble {
+  background-color: #f1f0f0;
+	color: black;
+	font-weight: normal;
+}
+
+.chatBubble {
+  border-radius: 10px;
+  padding: 1rem 2rem;
+  margin: 10px;
+  width: fit-content;
+	max-width: 80vw;
+
+  background: var(--dominos-dark-blue);
+  color: white;
+  font-weight: bold;
+}
