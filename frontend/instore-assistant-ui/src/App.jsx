@@ -40,14 +40,15 @@ function App() {
     }
   ]
   const { listening, isMicrophoneAvailable } = useSpeechRecognition({ commands });
-
   
   useEffect(() => {
     console.log('isListening', listening, isListening, isMicrophoneAvailable);
   }, [listening, isListening, isMicrophoneAvailable])
   
   const sendMessageToModel = async (words) => {
-    setMessages((messages) => [...messages, { text: words }]);
+    const oldPromptValue = promptValue;
+    setPromptValue("");
+    setMessages((messages) => [...messages, { text: words }, { text: '...' }]);
     try {
       const response = await fetch(AZURE_BACKEND_URL, {
         method: "POST",
@@ -73,12 +74,14 @@ function App() {
       console.log("Success:", response);
       const responseJSON = await response.json();
       setMessages((messages) => [
-        ...messages,
+        ...messages.slice(0, messages.length - 1),
         { text: responseJSON?.choices[0]?.message?.content },
       ]);
       console.log(responseJSON?.choices[0]?.message?.content);
     } catch (error) {
-      setPromptValue("");
+      setMessages((messages) => [
+        ...messages.slice(0, messages.length - 1),
+      ]);
       console.error("Error:", error);
     }
   };
@@ -89,7 +92,7 @@ function App() {
 
   // adding chat component in full screen container
   return (
-    <div className={styles.App}>
+    <div className={c(styles.App, isListening && styles.pulse)}>
       <audio ref={audioRef} src="/dinner-bell.wav"></audio>
       <section className={c(styles.topNav, isListening && styles.isRecording)}>In Store Assistant</section>
       <section
