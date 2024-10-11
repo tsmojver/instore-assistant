@@ -14,6 +14,7 @@ var serviceRegion = "eastus";
 function App() {
 
   const [messages, setMessages] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
 
   // const [allSpokenWords] = '';
   const [promptValue, setPromptValue] = useState("");
@@ -24,6 +25,7 @@ function App() {
   var audioConfig;
 
   const startMicrophoneInput = async () => {
+    setIsRecording(true);
     audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
 
     // setting the recognition language to English.
@@ -40,17 +42,21 @@ function App() {
 
         recognizer.close();
         recognizer = undefined;
+        setIsRecording(false);
       },
       function (err) {
         console.trace("err - " + err);
 
         recognizer.close();
         recognizer = undefined;
+        setIsRecording(false);
       }
     );
   };
 
   const sendMessageToModel = async () => {
+    const oldPromptValue = promptValue;
+    setPromptValue("");
     setMessages((messages) => [...messages, { text: promptValue }]);
 
     try {
@@ -82,16 +88,16 @@ function App() {
         { text: responseJSON?.choices[0]?.message?.content },
       ]);
       console.log(responseJSON?.choices[0]?.message?.content);
-      setPromptValue("");
     } catch (error) {
+      setPromptValue(oldPromptValue);
       console.error("Error:", error);
     }
   };
 
   // adding chat component in full screen container
   return (
-    <div className={styles.App}>
-      <section className={styles.topNav}>In Store Assistant</section>
+    <div className={c(styles.App, isRecording && styles.pulse)}>
+      <section className={c(styles.topNav, isRecording && styles.isRecording)}>In Store Assistant</section>
       <section
         className={c(
           styles.messagesContainer,
@@ -113,13 +119,14 @@ function App() {
       <section className={styles.inputRow}>
         <textarea
           className={styles.input}
+          tabIndex={0}
           onInput={(e) => setPromptValue(e.currentTarget.value)}
           type="text"
           inputMode="text"
           value={promptValue}
         />
-        <button onClick={startMicrophoneInput}>Record</button>
-        <button onClick={sendMessageToModel}>Send</button>
+        <button onClick={startMicrophoneInput} tabIndex={1}>{isRecording ? '...' : 'Record'}</button>
+        <button onClick={sendMessageToModel} tabIndex={2} className={c(styles.blueButton)} disabled={!promptValue}>Send</button>
       </section>
     </div>
   );

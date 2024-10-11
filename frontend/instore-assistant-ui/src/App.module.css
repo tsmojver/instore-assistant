@@ -12,15 +12,67 @@
   width: 100vw;
 }
 
+.pulse {
+  --light-shadow: var(--dominos-red);
+  --dark-shadow: var(--dominos-blue);
+
+  box-shadow: inset 1px 1px 4px var(--light-shadow),
+    inset -1px -1px 4px var(--light-shadow);
+  animation: shadowpulse 2.5s ease-in-out infinite;
+}
+
+@keyframes shadowpulse {
+  0% {
+    box-shadow: inset 1px 1px 4px var(--light-shadow),
+      inset -1px -1px 4px var(--light-shadow);
+  }
+  50% {
+    box-shadow: inset 12px 12px 10px var(--dark-shadow),
+      inset -6px -6px 8px var(--dark-shadow);
+  }
+  100% {
+    box-shadow: inset 1px 1px 4px var(--light-shadow),
+      inset -1px -1px 4px var(--light-shadow);
+  }
+}
+
 .topNav {
   background: var(--dominos-blue);
   color: white;
   font-weight: bold;
+  font-size: 1.2rem;
   padding: 1rem;
+
+  transition: background 0.3s ease;
+}
+
+.topNav.isRecording {
+  background: linear-gradient(
+    -45deg,
+    var(--dominos-red),
+    var(--dominos-blue),
+    var(--dominos-red),
+    var(--dominos-blue)
+  );
+  background-size: 400% 400%;
+  animation: gradient 10s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .messagesContainer {
   flex-grow: 1;
+  overflow-y: scroll;
 }
 .messagesContainer.noMessages {
   display: flex;
@@ -32,11 +84,23 @@
 
 .inputRow {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   align-items: center;
-  margin-bottom: 0.5rem;
-  margin-inline: 0.5rem;
+  margin-block: 1rem;
+  margin-inline: 5rem;
 }
 .inputRow textarea {
   flex-grow: 1;
+}
+
+.blueButton {
+  background: var(--dominos-dark-blue);
+  color: white;
+
+  transition: background 0.3s ease;
+}
+
+.blueButton:disabled {
+  background: var(--dominos-darker);
+  opacity: 0.5;
 }

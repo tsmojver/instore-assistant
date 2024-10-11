@@ -18,6 +18,19 @@
   --dominos-darker: #212121;
 }
 
+button,
+textarea {
+  transition: all 0.3s ease;
+}
+textarea {
+  font-weight: bold;
+  font-family: inherit;
+  text-align: start;
+  padding: 0.5rem;
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
