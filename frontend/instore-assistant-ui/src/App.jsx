@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./App.module.css";
 import ChatMessage from "./components/ChatMessage";
 import c from "classnames";
+import ReactMarkdown from 'react-markdown';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 const AZURE_API_KEY = "3d6f86c1346c47d4880bb548c6b304ce";
@@ -20,8 +21,8 @@ function App() {
     audioRef.current.play();
   }
   const handleWords = (words) => {
-    console.log('handleWords', words, isListening);
     if (isListening && Boolean(words)) {
+      console.log('Sending to API', words)
       setPromptValue(words);
       sendMessageToModel(words);
       setIsListening(false);
@@ -101,7 +102,9 @@ function App() {
           messages.map((message, index) => {
             return (
               <ChatMessage key={index} isLeftAligned={index % 2 ? false : true}>
+                <ReactMarkdown>
                 {message.text}
+                </ReactMarkdown>
               </ChatMessage>
             );
           })
