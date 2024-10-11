@@ -57,7 +57,7 @@ function App() {
   const sendMessageToModel = async () => {
     const oldPromptValue = promptValue;
     setPromptValue("");
-    setMessages((messages) => [...messages, { text: promptValue }]);
+    setMessages((messages) => [...messages, { text: promptValue }, { text: '...' }]);
 
     try {
       const response = await fetch(AZURE_BACKEND_URL, {
@@ -84,12 +84,15 @@ function App() {
       console.log("Success:", response);
       const responseJSON = await response.json();
       setMessages((messages) => [
-        ...messages,
+        ...messages.slice(0, messages.length - 1),
         { text: responseJSON?.choices[0]?.message?.content },
       ]);
       console.log(responseJSON?.choices[0]?.message?.content);
     } catch (error) {
       setPromptValue(oldPromptValue);
+      setMessages((messages) => [
+        ...messages.slice(0, messages.length - 1),
+      ]);
       console.error("Error:", error);
     }
   };
