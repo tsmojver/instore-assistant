@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Test Web Speech API Wake word</title>
+    <script type="text/javascript">
+      let wakeWordHeard = false;
+      let forcedStop = false;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+      const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+      
+      function pushToOutput(text) {
+        const diagnostic = document.querySelector(".output");
+        diagnostic.textContent = `Result Received: ${text}`;
+      }
+      const grammarWords = [
+        "Hey Dom"
+      ];
+      
+      const grammar = `#JSGF V1.0; grammar wake; public <wake> = ${grammarWords.join(" | ")}`;
+
+      const recognition = new SpeechRecognition();
+      const speechRecognitionList = new SpeechGrammarList();
+      speechRecognitionList.addFromString(grammar, 1);
+      recognition.grammars = speechRecognitionList;
+      recognition.continious = true;
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      
+      recognition.onresult = (event) => {
+        if (event.results[0][0].transcript.toLowerCase() == "hey dom") {
+          console.log("wake word recognized");
+          wakeWordHeard = true;
+          document.querySelector("#sound").play();
+          return;
+        }
+        if (wakeWordHeard) {
+          console.log("wake word heard", event.results[0][0].transcript)
+          pushToOutput(event.results[0][0].transcript)
+          wakeWordHeard = false;
+        }
+      }
+      recognition.addEventListener('end', () => {
+        if (!forcedStop) {
+          console.log("starting again");
+          recognition.start();
+        }
+      });
+      recognition.addEventListener('speechstart', () => {
+        console.log('speech started')
+      });
+      recognition.addEventListener('speechend', () => {
+        console.log('speech ended')
+      });
+      
+      recognition.start();
+
+      function handleStop() {
+        forcedStop = true;
+        console.log("stop initiated")
+      }
+      function handleStart() {
+        forcedStop = false;
+        console.log('start initiated')
+        recognition.start();
+      }
+    </script>
+  </head>
+  <body>
+    <audio id="sound" controls="false" src="dinner-bell.wav"></audio>
+    <div class="output"></div>
+    <button onclick="handleStop()">Stop</button>
+    <button onclick="handleStart()">Start</button>
+  </body>
+</html>
