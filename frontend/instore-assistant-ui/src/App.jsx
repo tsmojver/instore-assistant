@@ -21,7 +21,7 @@ function App() {
   }
   const handleWords = (words) => {
     console.log('handleWords', words, isListening);
-    if (isListening) {
+    if (isListening && Boolean(words)) {
       setPromptValue(words);
       sendMessageToModel(words);
       setIsListening(false);
@@ -34,15 +34,16 @@ function App() {
     },
     {
       command: '*',
-      callback: (words) => handleWords(words)
+      callback: (words) => handleWords(words),
+      matchInterim: false
     }
   ]
-  const { listening, transcript, isMicrophoneAvailable } = useSpeechRecognition({ commands });
+  const { listening, isMicrophoneAvailable } = useSpeechRecognition({ commands });
 
   
   useEffect(() => {
-    console.log('isListening', listening, isListening, transcript, isMicrophoneAvailable);
-  }, [listening, isListening, transcript, isMicrophoneAvailable])
+    console.log('isListening', listening, isListening, isMicrophoneAvailable);
+  }, [listening, isListening, isMicrophoneAvailable])
   
   const sendMessageToModel = async (words) => {
     setMessages((messages) => [...messages, { text: words }]);
